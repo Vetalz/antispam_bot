@@ -99,6 +99,15 @@ async def get_chat(call, callback_data):
 
 @dp.message_handler(commands=['1'])
 async def set_key_new_msg(message):
+    await key_new_msg(message, '/1', 'add')
+
+
+@dp.message_handler(commands=['5'])
+async def delete_key_new_msg(message):
+    await key_new_msg(message, '/5', 'delete')
+
+
+async def key_new_msg(message, command, operation):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
     pre_check = check(user_id, chat_id)
@@ -110,16 +119,19 @@ async def set_key_new_msg(message):
     chat_id_with_db = chat_with_db.chat_id
 
     try:
-        keywords = re.findall(r'/1 (\D+)', message.text)[0]
+        keywords = re.findall(rf'{command} (\D+)', message.text)[0]
     except IndexError:
         text = BaseAnswer.except_command_2()
         await message.answer(text)
         return
 
     keywords = keywords.split(',')
-    OperationKey.add_keywords(keywords, chat_id_with_db)
+    if operation == 'add':
+        OperationKey.add_keywords(keywords, chat_id_with_db)
+    else:
+        OperationKey.delete_keywords(keywords, chat_id_with_db)
     OperationChatUser.delete_user_chat(user_id)
-    text = KeyAnswer.success()
+    text = KeyAnswer.success(operation)
     await message.answer(text)
 
 
