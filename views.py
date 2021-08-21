@@ -19,6 +19,11 @@ class BaseAnswer:
         text = 'Выбирите чат'
         return text
 
+    @staticmethod
+    def except_command_4():
+        text = 'Вы добавили бота в чат, но не запустили его. Отправьте команду /start'
+        return text
+
 
 class StartAnswer:
     @staticmethod
