@@ -34,8 +34,8 @@ async def send_welcome(message):
         text = StartAnswer.except_1()
         await message.answer(text)
     else:
-        chat = OperationChat.get_chat(chat_id)
-        if chat and chat.admin_id == user_id:
+        chat_admins = OperationChat.get_chat_admins(chat_id)
+        if user_id in chat_admins:
             flag = True
         else:
             flag = False
@@ -258,7 +258,7 @@ async def listen_msg(message):
 
     is_keyword = check_keywords(msg_text, chat_id)
 
-    is_limit = check_limit(user_id, chat_id, msg_text, text_hash, message_id)
+    is_limit = check_limit(user_id, user_name, chat_id, msg_text, text_hash, message_id)
 
     if is_keyword or is_limit:
         await bot.delete_message(chat_id, message_id)
@@ -278,11 +278,11 @@ def check_keywords(msg_text, chat_id):
     return False
 
 
-def check_limit(user_id, chat_id, msg_text, text_hash, message_id, ):
+def check_limit(user_id, user_name, chat_id, msg_text, text_hash, message_id, ):
     hash_limit_count_db = OperationText.get_id_hash_limit_count(chat_id)
     if not hash_limit_count_db:
         save_text = OperationText.add_text(chat_id, text_hash, -1, msg_text)
-        OperationMessage.add_message(chat_id, user_id, message_id, save_text.id)
+        OperationMessage.add_message(chat_id, user_id, user_name, message_id, save_text.id)
         return False
     for i in hash_limit_count_db:
         if text_hash in i['hash']:
@@ -291,11 +291,11 @@ def check_limit(user_id, chat_id, msg_text, text_hash, message_id, ):
                 return True
             else:
                 OperationText.update_count(chat_id, i['hash'], count)
-                OperationMessage.add_message(chat_id, user_id, message_id, i['id'])
+                OperationMessage.add_message(chat_id, user_id, user_name, message_id, i['id'])
                 return False
 
     save_text = OperationText.add_text(chat_id, text_hash, -1, msg_text)
-    OperationMessage.add_message(chat_id, user_id, message_id, save_text.id)
+    OperationMessage.add_message(chat_id, user_id, user_name, message_id, save_text.id)
     return False
 
 
@@ -323,9 +323,9 @@ def init_msg(message):
     chat_title = chat['title']
     user = message.from_user
     user_id = user['id']
-    try:
-        user_name = user['username']
-    except KeyError:
+    user_name = user['username']
+
+    if not user_name:
         user_name = user_id
     return user_id, chat_id, chat_title, user_name
 

@@ -25,7 +25,10 @@ class User(BaseModel):
 class Chat(BaseModel):
     chat_id = BigIntegerField(primary_key=True)
     title = CharField(max_length=255)
-    admin = ForeignKeyField(User, backref='chats')
+    admins = ManyToManyField(User, backref='chats')
+
+
+User_Chat = Chat.admins.get_through_model()
 
 
 class Text(BaseModel):
@@ -73,7 +76,8 @@ class OperationUser:
 
     @staticmethod
     def get_user_chat(user_id):
-        query = Chat.select().where(Chat.admin_id == user_id).order_by(Chat.chat_id)
+        query = Chat.select().join(User_Chat).join(User).where(User.user_id == user_id)
+        # query = Chat.select().where(Chat.admin_id == user_id).order_by(Chat.chat_id)
         chats = []
         for i in query:
             chat = {'title': i.title, 'id': i.chat_id}
@@ -86,7 +90,7 @@ class OperationUser:
         with open('config.ini', 'r') as f:
             for line in f.readlines():
                 users.append(line.rstrip())
-        if user_name in users:
+        if str(user_name) in users:
             is_access = True
         else:
             is_access = False
@@ -99,7 +103,10 @@ class OperationChat:
     def add_chat(chat_id, title, user):
         chat = OperationChat.get_chat(chat_id)
         if not chat:
-            chat = Chat.create(chat_id=chat_id, title=title, admin=user)
+            chat = Chat.create(chat_id=chat_id, title=title)
+            chat.admins.add(user)
+        else:
+            chat.admins.add(user)
         return chat
 
     @staticmethod
@@ -109,6 +116,14 @@ class OperationChat:
         except Chat.DoesNotExist:
             chat = None
         return chat
+
+    @staticmethod
+    def get_chat_admins(chat_id):
+        query = User_Chat.select().where(User_Chat.chat_id == chat_id)
+        admins = []
+        for i in query:
+            admins.append(i.user_id)
+        return admins
 
 
 class OperationChatUser:
@@ -225,16 +240,17 @@ class OperationMessage:
         query.execute()
 
     @staticmethod
-    def add_message(chat_id, user_id, message_id, text_id):
+    def add_message(chat_id, user_id, user_name, message_id, text_id):
         date_time = datetime.datetime.now()
-        msg = Message.create(chat_id=chat_id, user_id=user_id, message_id=message_id,
+        user = OperationUser.add_user(user_id, user_name)
+        msg = Message.create(chat_id=chat_id, user_id=user, message_id=message_id,
                              text_id=text_id, date_create=date_time)
         return msg
 
 
 def create_tables():
     with db:
-        db.create_tables([User, Chat, Text, Message, Key, UserChat])
+        db.create_tables([User, Chat, Text, Message, Key, UserChat, User_Chat])
 
 
 if __name__ == '__main__':
