@@ -24,8 +24,7 @@ cb = CallbackData('id', 'user_id', 'chat_id', 'chat_title')
 @dp.message_handler(commands=['start'])
 async def send_welcome(message):
     user_id, chat_id, chat_title, user_name = init_msg(message)
-
-    is_access = OperationUser.check_access(user_id)
+    is_access = OperationUser.check_access(user_name)
     if not is_access:
         text = BaseAnswer.except_access()
         await message.answer(text)
@@ -54,7 +53,7 @@ async def send_welcome(message):
 async def admin(message):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
-    is_access = OperationUser.check_access(user_id)
+    is_access = OperationUser.check_access(user_name)
     if not is_access:
         text = BaseAnswer.except_access()
         await message.answer(text)
@@ -110,7 +109,7 @@ async def delete_key_new_msg(message):
 async def key_new_msg(message, command, operation):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
-    pre_check = check(user_id, chat_id)
+    pre_check = check(user_name, user_id, chat_id)
     if pre_check:
         await message.answer(pre_check)
         return
@@ -139,7 +138,7 @@ async def key_new_msg(message, command, operation):
 async def set_limit(message):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
-    pre_check = check(user_id, chat_id)
+    pre_check = check(user_name, user_id, chat_id)
     if pre_check:
         await message.answer(pre_check)
         return
@@ -174,7 +173,7 @@ async def set_limit(message):
 async def set_key_old(message):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
-    pre_check = check(user_id, chat_id)
+    pre_check = check(user_name, user_id, chat_id)
     if pre_check:
         await message.answer(pre_check)
         return
@@ -208,7 +207,7 @@ async def set_key_old(message):
 async def set_user_old(message):
     user_id, chat_id, chat_title, user_name = init_msg(message)
 
-    pre_check = check(user_id, chat_id)
+    pre_check = check(user_name, user_id, chat_id)
     if pre_check:
         await message.answer(pre_check)
         return
@@ -300,8 +299,8 @@ def check_limit(user_id, chat_id, msg_text, text_hash, message_id, ):
     return False
 
 
-def check(user_id, chat_id):
-    is_access = OperationUser.check_access(user_id)
+def check(user_name, user_id, chat_id):
+    is_access = OperationUser.check_access(user_name)
     if not is_access:
         text = BaseAnswer.except_access()
         return text
@@ -327,7 +326,7 @@ def init_msg(message):
     try:
         user_name = user['username']
     except KeyError:
-        user_name = None
+        user_name = user_id
     return user_id, chat_id, chat_title, user_name
 
 

@@ -81,12 +81,12 @@ class OperationUser:
         return chats
 
     @staticmethod
-    def check_access(user_id):
+    def check_access(user_name):
         users = []
         with open('config.ini', 'r') as f:
             for line in f.readlines():
-                users.append(int(line.rstrip()))
-        if user_id in users:
+                users.append(line.rstrip())
+        if user_name in users:
             is_access = True
         else:
             is_access = False
