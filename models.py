@@ -214,6 +214,13 @@ class OperationText:
             hash_limit_count.append(item)
         return hash_limit_count
 
+    @staticmethod
+    def get_text_id(chat_id, text_hash):
+        query = Text.select().where(Text.chat_id == chat_id, Text.hash == text_hash)
+        text = {}
+        for i in query:
+            text = {'id': i.id}
+        return text
 
 class OperationMessage:
     @staticmethod

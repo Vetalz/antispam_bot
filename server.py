@@ -124,7 +124,10 @@ async def key_new_msg(message, command, operation):
         await message.answer(text)
         return
 
-    keywords = keywords.split(',')
+    raw_keywords = keywords.split(',')
+    keywords = []
+    for keyword in raw_keywords:
+        keywords.append(keyword.strip())
     if operation == 'add':
         OperationKey.add_keywords(keywords, chat_id_with_db)
     else:
@@ -188,7 +191,10 @@ async def set_key_old(message):
         await message.answer(text)
         return
 
-    keywords = keywords.split(',')
+    raw_keywords = keywords.split(',')
+    keywords = []
+    for keyword in raw_keywords:
+        keywords.append(keyword.strip())
     messages = OperationMessage.get_message(chat_id_with_db)
     count = 0
     for msg in messages:
@@ -222,7 +228,10 @@ async def set_user_old(message):
         await message.answer(text)
         return
 
-    users = users.split(',')
+    raw_users = users.split(',')
+    users = []
+    for user in raw_users:
+        users.append(user.strip())
     messages = OperationMessage.get_message(chat_id_with_db)
     count = 0
     for msg in messages:
@@ -262,6 +271,8 @@ async def listen_msg(message):
 
     if is_keyword or is_limit:
         await bot.delete_message(chat_id, message_id)
+        text = OperationText.get_text_id(chat_id, text_hash)
+        OperationMessage.delete_message(chat_id, text['id'])
         text = ChatAnswer.warning()
         await message.answer(text)
         return
