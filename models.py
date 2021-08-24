@@ -222,6 +222,7 @@ class OperationText:
             text = {'id': i.id}
         return text
 
+
 class OperationMessage:
     @staticmethod
     def get_message(chat_id):
@@ -239,6 +240,11 @@ class OperationMessage:
     @staticmethod
     def delete_message(chat_id, text_id):
         query = Message.update(is_delete=True).where(Message.chat_id == chat_id, Message.text_id == text_id)
+        query.execute()
+
+    @staticmethod
+    def delete_current_message(chat_id, message_id):
+        query = Message.update(is_delete=True).where(Message.chat_id == chat_id, Message.message_id == message_id)
         query.execute()
 
     @staticmethod

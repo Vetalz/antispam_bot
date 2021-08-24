@@ -270,9 +270,10 @@ async def listen_msg(message):
     is_limit = check_limit(user_id, user_name, chat_id, msg_text, text_hash, message_id)
 
     if is_keyword or is_limit:
+        # text = OperationText.get_text_id(chat_id, text_hash)
+        # OperationMessage.add_message(chat_id, user_id, user_name, message_id, text['id'])
+        OperationMessage.delete_current_message(chat_id, message_id)
         await bot.delete_message(chat_id, message_id)
-        text = OperationText.get_text_id(chat_id, text_hash)
-        OperationMessage.delete_message(chat_id, text['id'])
         text = ChatAnswer.warning()
         await message.answer(text)
         return
@@ -299,6 +300,8 @@ def check_limit(user_id, user_name, chat_id, msg_text, text_hash, message_id, ):
         if text_hash in i['hash']:
             count = i['count'] + 1
             if 0 < i['limit'] < count:
+                text = OperationText.get_text_id(chat_id, text_hash)
+                OperationMessage.add_message(chat_id, user_id, user_name, message_id, text['id'])
                 return True
             else:
                 OperationText.update_count(chat_id, i['hash'], count)
