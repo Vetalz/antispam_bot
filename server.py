@@ -1,7 +1,7 @@
 import logging
 import os
 from views import BaseAnswer, StartAnswer, AdminAnswer, SelectAnswer, \
-                  KeyAnswer, FrequencyAnswer, KeyOldAnswer, UserOldAnswer, ChatAnswer
+                  KeyAnswer, FrequencyAnswer, KeyOldAnswer, UserOldAnswer, ChatAnswer, Help
 from models import OperationUser, OperationChat, OperationChatUser, OperationKey, OperationText, OperationMessage
 
 from aiogram import Bot, Dispatcher, executor
@@ -243,6 +243,12 @@ async def set_user_old(message):
 
     OperationChatUser.delete_user_chat(user_id)
     text = UserOldAnswer.success(count)
+    await message.answer(text)
+
+
+@dp.message_handler(commands=['help'])
+async def set_user_old(message):
+    text = Help.help()
     await message.answer(text)
 
 
