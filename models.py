@@ -152,7 +152,7 @@ class OperationKey:
     def add_keywords(list_keywords, chat_id):
         for keyword in list_keywords:
             keyword = keyword.lower()
-            key_with_db = OperationKey.get_keyword(keyword)
+            key_with_db = OperationKey.get_keyword(keyword, chat_id)
             if key_with_db:
                 continue
             else:
@@ -162,14 +162,14 @@ class OperationKey:
     def delete_keywords(list_keywords, chat_id):
         for keyword in list_keywords:
             keyword = keyword.lower()
-            key_with_db = OperationKey.get_keyword(keyword)
+            key_with_db = OperationKey.get_keyword(keyword, chat_id)
             if key_with_db:
                 q = Key.delete().where(Key.chat_id == chat_id, Key.text == keyword)
                 q.execute()
 
     @staticmethod
-    def get_keyword(keyword):
-        key_with_db = Key.get_or_none(Key.text == keyword)
+    def get_keyword(keyword, chat_id):
+        key_with_db = Key.get_or_none(Key.text == keyword, Key.chat_id == chat_id)
         return key_with_db
 
     @staticmethod
